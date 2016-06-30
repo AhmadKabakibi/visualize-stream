@@ -1,0 +1,14 @@
+{
+  "name": "crom-som-stream",
+  "version": "0.0.1",
+  "author": "ahmad kabakibi",
+  "private": true,
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "*",
+    "twitter": "*",
+    "socket.io": "*"
+  }
+}
