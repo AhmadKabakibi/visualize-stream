@@ -6,6 +6,48 @@ var twitter = require('twitter'),
     server = http.createServer(app),
     io = require('socket.io').listen(server);
 
+var winston = require('winston'),
+    fs = require('fs'),
+    path = require('path');
+var filename = path.join(__dirname,'/logs/', 'created-data.log');
+
+try { fs.unlinkSync(filename); }
+catch (ex) { }
+
+//
+// Create a new winston logger instance with two tranports: Console, and File
+//
+//
+
+var logger = new winston.Logger({
+  level: 'info',
+  transports: [
+    new (winston.transports.Console)(),
+    new (winston.transports.File)({ filename: filename })
+  ]
+});
+
+//
+// Replaces the previous transports with those in the
+// new configuration wholesale.
+//
+logger.configure({
+  level: 'verbose',
+  transports: [
+    new (require('winston-daily-rotate-file'))({ filename: filename })
+  ]
+});
+
+setTimeout(function () {
+  //
+  // Remove the file, ignoring any errors
+  //
+  try { fs.unlinkSync(filename); }
+  catch (ex) { }
+}, 1000);
+
+
+
 //Setup twitter stream api
 var twit = new twitter({
   consumer_key: 'aIiEO0MSjEMBcOr7oicfaGFyQ',
@@ -33,6 +75,9 @@ io.sockets.on('connection', function (socket) {
             stream.on('data', function(data) {
               // Does the JSON result have coordinates
               console.log("Data coming :"+JSON.stringify(data));
+              logger.log('info', JSON.stringify(data));
+
+
               if (data.coordinates){
                 if (data.coordinates !== null){
                   //If so then build up some nice json and send out to web sockets
